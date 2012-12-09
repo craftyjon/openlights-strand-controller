@@ -33,7 +33,7 @@
 
 void process_usb(uint8_t byte)
 {
-	PORTA.OUTSET = (1<<6);	// ACT
+	PORTA.OUTTGL = (1<<6);	// ACT
 
 	switch (g_cmdState) {
 		case STATE_IDLE:
@@ -55,7 +55,7 @@ void process_usb(uint8_t byte)
 			break;
 
 		case STATE_START:
-			PORTA.OUTSET = (1<<7);  // DATA
+			PORTA.OUTTGL = (1<<7);  // DATA
 			if (g_usbDataCount == 0) {
 				g_usbCommand = byte;
 				g_usbDataCount++;
@@ -96,8 +96,6 @@ void process_usb(uint8_t byte)
 			g_cmdState = STATE_IDLE;
 			break;
 	}
-
-	PORTA.OUTCLR = (1<<6) | (1<<7);
 }
 
 

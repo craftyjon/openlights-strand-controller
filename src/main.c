@@ -44,7 +44,7 @@ static void strand_output_isr(void)
 	if (dirty) {
 		dirty = 0;
 		spi_write_packet(&SPIC, data_buffer, (3 * num_leds));
-		PORTA.OUTCLR = (1<<6);  // ACT
+		// PORTA.OUTCLR = (1<<6);  // ACT
 	}
 }
 
@@ -56,7 +56,7 @@ static void tick_isr(void)
 	
 	// Refresh the strand periodically even if no new data
 	if (g_cmdState == STATE_IDLE) {
-		PORTA.OUTSET = (1<<6);	// ACT
+		PORTA.OUTTGL = (1<<6);	// ACT
 		PORTA.OUTCLR = (1<<7);	// DATA
 		dirty = 1;
 	}
@@ -122,7 +122,7 @@ int main (void)
 			dirty = 1;
 		} else {
 			
-			if (udi_cdc_is_tx_ready()) {
+			if (udi_cdc_is_rx_ready()) {
 				if (!g_usbConnected) {
 					g_usbConnected = 1;
 					// Enable RS485 transmitter if USB is connected.
@@ -134,8 +134,8 @@ int main (void)
 				usart_putchar(&USARTC0, usbbyte);
 				process_usb(usbbyte);
 			} else if (g_rs485rdy) {
-				process_usb(g_rs485data);
 				g_rs485rdy = 0;
+				process_usb(g_rs485data);
 			}
 		}		
 	}
