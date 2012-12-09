@@ -106,6 +106,8 @@ void init_globals(void)
 	g_usbDataLength = 0;
 	g_usbDataCount = 0;
 	g_usbConnected = 0;
+	g_rs485data = 0;
+	g_rs485rdy = 0;
 
 	// Init strand data buffers
 	memset(&data_buffer, 0, sizeof(data_buffer));

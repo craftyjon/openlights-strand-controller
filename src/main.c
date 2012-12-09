@@ -67,13 +67,15 @@ static void tick_isr(void)
 ISR(USARTC0_RXC_vect)
 {
 	PORTA.OUTSET = (1<<6);
-	g_usartData = USARTC0.DATA;
-	process_usb(true);
+	g_rs485data = USARTC0.DATA;
+	g_rs485rdy = 1;
 }
 
 
 int main (void)
 {
+	uint8_t usbbyte;
+
 	// ASF board initialization
 	sysclk_init();
 	pmic_init();
@@ -129,7 +131,12 @@ int main (void)
 					ioport_set_pin_high(RS485_DE);
 					ioport_set_pin_high(RS485_REn);
 				}
-				process_usb(false);
+				usbbyte = udi_cdc_getc();
+				usart_putchar(&USARTC0, usbbyte);
+				process_usb(usbbyte);
+			} else if (g_rs485rdy) {
+				process_usb(g_rs485data);
+				g_rs485rdy = 0;
 			}
 		}		
 	}

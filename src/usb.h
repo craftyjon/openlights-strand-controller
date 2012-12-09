@@ -26,8 +26,8 @@
 #ifndef _USB_H
 #define _USB_H
 
-void process_usb(bool from_isr);
-bool usb_checksum(uint8_t input, uint8_t *output);
+void process_usb(uint8_t byte);
+bool usb_checksum(uint8_t input);
 
 enum {
 	STATE_IDLE,

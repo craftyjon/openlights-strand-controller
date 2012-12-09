@@ -74,5 +74,7 @@ EXTERN uint16_t g_usbDataCount;
 EXTERN uint8_t g_usbDataBuffer[10 + (MAX_LEDS * 3)];
 
 EXTERN uint8_t g_usbConnected;
+EXTERN volatile uint8_t g_rs485data;
+EXTERN volatile uint8_t g_rs485rdy;
 
 #endif
