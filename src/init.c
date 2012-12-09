@@ -30,6 +30,8 @@
 #include "pins.h"
 #include "globals.h"
 
+
+// Setup I/O pins.
 void init_pins(void)
 {
 	ioport_enable_pin(SW0);
@@ -103,6 +105,7 @@ void init_globals(void)
 	g_cmdState = STATE_IDLE;
 	g_usbDataLength = 0;
 	g_usbDataCount = 0;
+	g_usbConnected = 0;
 
 	// Init strand data buffers
 	memset(&data_buffer, 0, sizeof(data_buffer));

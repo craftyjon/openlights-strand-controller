@@ -42,9 +42,9 @@
 #define FW_REV_MINOR 0
 
 /* Settings */
- #define STRAND_BIT_RATE 2500000
- #define RS485_BIT_RATE 2000000
- #define USB_CDC_BIT_RATE 2000000
+#define STRAND_BIT_RATE 2500000
+#define RS485_BIT_RATE 2000000
+#define USB_CDC_BIT_RATE 2000000
 
 EXTERN uint8_t g_address;
 EXTERN uint8_t g_usartData;
@@ -72,5 +72,7 @@ EXTERN uint8_t g_usbCommand;
 EXTERN uint16_t g_usbDataLength;
 EXTERN uint16_t g_usbDataCount;
 EXTERN uint8_t g_usbDataBuffer[10 + (MAX_LEDS * 3)];
+
+EXTERN uint8_t g_usbConnected;
 
 #endif

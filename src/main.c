@@ -38,6 +38,7 @@
 #include "init.h"
 
 
+// High-frequency timer
 static void strand_output_isr(void)
 {
 	if (dirty) {
@@ -48,6 +49,7 @@ static void strand_output_isr(void)
 }
 
 
+// Low-frequency timer
 static void tick_isr(void)
 {
 	ticks++;
@@ -61,13 +63,7 @@ static void tick_isr(void)
 }
 
 
-// Disable RS485 transmitter after successful send
-ISR(USARTC0_DRE_vect)
-{
-	ioport_set_pin_low(RS485_DE);
-	ioport_set_pin_low(RS485_REn);
-}
-
+// RS485 receive ISR
 ISR(USARTC0_RXC_vect)
 {
 	PORTA.OUTSET = (1<<6);
@@ -116,6 +112,9 @@ int main (void)
 	
 	while (1) {
 		if (!ioport_get_pin_level(SW5)) {	// Test mode
+			// Disable transmitter
+			ioport_set_pin_low(RS485_DE);
+			ioport_set_pin_low(RS485_REn);
 			for (uint16_t i = 0; i < 3 * num_leds; i++) {
 				data_buffer[i] = 100;
 			}
@@ -123,6 +122,13 @@ int main (void)
 		} else {
 			
 			if (udi_cdc_is_tx_ready()) {
+				if (!g_usbConnected) {
+					g_usbConnected = 1;
+					// Enable RS485 transmitter if USB is connected.
+					// For now, this requires a power-cycle to clear.
+					ioport_set_pin_high(RS485_DE);
+					ioport_set_pin_high(RS485_REn);
+				}
 				process_usb(false);
 			}
 		}		
