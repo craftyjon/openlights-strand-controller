@@ -17,3 +17,4 @@ Development
 Portions of the firmware utilize the Atmel Software Framework.
 The binaries are built using Atmel's avr-gcc binaries on a Linux machine.
 It should be possible to build the code in Atmel Studio on Windows.
+
