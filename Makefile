@@ -43,6 +43,7 @@ PRJSRC=./src/asf/common/boards/user_board/init.c \
 	./src/asf/xmega/drivers/usart/usart.c \
 	./src/commands.c \
 	./src/usb.c \
+	./src/init.c \
 	./src/asf/common/services/clock/xmega/sysclk.c \
 	./src/asf/common/services/ioport/xmega/ioport_compat.c \
 	./src/asf/common/services/sleepmgr/xmega/sleepmgr.c \
