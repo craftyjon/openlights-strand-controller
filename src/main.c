@@ -66,7 +66,6 @@ static void tick_isr(void)
 // RS485 receive ISR
 ISR(USARTC0_RXC_vect)
 {
-	PORTA.OUTSET = (1<<6);
 	g_rs485data = USARTC0.DATA;
 	g_rs485rdy = 1;
 }
@@ -135,6 +134,7 @@ int main (void)
 				usart_putchar(&USARTC0, usbbyte);
 				process_usb(usbbyte);
 			} else if (g_rs485rdy) {
+				PORTA.OUTSET = (1<<6);
 				process_usb(g_rs485data);
 				g_rs485rdy = 0;
 			}
