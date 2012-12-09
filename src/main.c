@@ -44,7 +44,7 @@ static void strand_output_isr(void)
 	if (dirty) {
 		dirty = 0;
 		spi_write_packet(&SPIC, data_buffer, (3 * num_leds));
-		PORTA.OUTCLR = (1<<6);
+		PORTA.OUTCLR = (1<<6);  // ACT
 	}
 }
 
@@ -56,8 +56,8 @@ static void tick_isr(void)
 	
 	// Refresh the strand periodically even if no new data
 	if (g_cmdState == STATE_IDLE) {
-		PORTA.OUTSET = (1<<6);
-		PORTA.OUTCLR = (1<<7);
+		PORTA.OUTSET = (1<<6);	// ACT
+		PORTA.OUTCLR = (1<<7);	// DATA
 		dirty = 1;
 	}
 }
@@ -134,7 +134,6 @@ int main (void)
 				usart_putchar(&USARTC0, usbbyte);
 				process_usb(usbbyte);
 			} else if (g_rs485rdy) {
-				PORTA.OUTSET = (1<<6);
 				process_usb(g_rs485data);
 				g_rs485rdy = 0;
 			}
