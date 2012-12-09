@@ -30,9 +30,8 @@
 #include "pins.h"
 #include "globals.h"
 
-void board_init(void)
+void init_pins(void)
 {
-	num_leds = 8;
 	ioport_enable_pin(SW0);
 	ioport_enable_pin(SW1);
 	ioport_enable_pin(SW2);
@@ -66,4 +65,83 @@ void board_init(void)
 
 	PORTC.DIRSET = PIN3_bm;
 	PORTC.DIRCLR = PIN2_bm;
+
+	// SPI pins for strand data output
+	// PC5 = strand data
+	// PC7 = strand clock
+	PORTC.DIRSET = (1<<5) | (1<<7);
+	PORTC.PIN5CTRL = PORT_OPC_PULLUP_gc;
+	PORTC.PIN7CTRL = PORT_OPC_PULLUP_gc;
+}
+
+
+// Setup global variables needed before communications starts
+void init_globals(void)
+{
+	num_leds = 8;
+
+	// Init board address
+	g_address = 0x00;
+	
+	if (!ioport_get_pin_level(SW0)) {
+		g_address |= (1<<0);
+	}
+	
+	if (!ioport_get_pin_level(SW1)) {
+		g_address |= (1<<1);
+	}
+	
+	if (!ioport_get_pin_level(SW2)) {
+		g_address |= (1<<2);
+	}
+	
+	if (!ioport_get_pin_level(SW3)) {
+		g_address |= (1<<3);
+	}
+
+	// Init byte-oriented communications (via USB or RS485)
+	g_cmdState = STATE_IDLE;
+	g_usbDataLength = 0;
+	g_usbDataCount = 0;
+
+	// Init strand data buffers
+	memset(&data_buffer, 0, sizeof(data_buffer));
+	dirty = 1;
+}
+
+
+// RS485 is used for board-to-board communications
+void init_rs485(void)
+{
+	struct usart_rs232_options usart_params;
+
+	usart_params.baudrate = RS485_BIT_RATE;
+	usart_params.charlength = USART_CHSIZE_8BIT_gc;
+	usart_params.paritytype = USART_PMODE_DISABLED_gc;
+	usart_params.stopbits = false;
+
+	usart_init_rs232(&USARTC0, &usart_params);
+	usart_set_rx_interrupt_level(&USARTC0, USART_INT_LVL_MED);
+	usart_rx_enable(&USARTC0);
+}
+
+
+// SPI is used for strand data output
+void init_strand(void)
+{
+	struct spi_device dummy_device = {
+		.id = IOPORT_CREATE_PIN(PORTA, 1)
+	};
+
+	spi_master_init(&SPIC);
+	spi_master_setup_device(&SPIC, &dummy_device, SPI_MODE_0, STRAND_BIT_RATE, 0);
+	spi_enable(&SPIC);
+}
+
+
+// USB CDC class (i.e. virtual serial port) used for Controller
+void init_usb(void)
+{
+	udc_start();
+	udc_attach();
 }

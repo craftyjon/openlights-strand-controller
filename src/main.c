@@ -35,13 +35,7 @@
 #include "pins.h"
 #include "usb.h"
 #include "commands.h"
-
-void spi_init_pins(void);
-void spi_init_module(void);
-
-struct spi_device dummy_device = {
-	.id = IOPORT_CREATE_PIN(PORTA, 1)
-};
+#include "init.h"
 
 
 static void strand_output_isr(void)
@@ -81,87 +75,22 @@ ISR(USARTC0_RXC_vect)
 	process_usb(true);
 }
 
-void spi_init_pins(void)
-{
-	PORTC.DIRSET = (1<<4) | (1<<5) | (1<<7);
-	PORTC.PIN4CTRL = PORT_OPC_PULLUP_gc;
-	PORTC.PIN5CTRL = PORT_OPC_PULLUP_gc;
-	PORTC.PIN7CTRL = PORT_OPC_PULLUP_gc;
-}
-
-void spi_init_module(void)
-{
-	spi_master_init(&SPIC);
-	spi_master_setup_device(&SPIC, &dummy_device, SPI_MODE_0, 2500000, 0);
-	spi_enable(&SPIC);
-}
-
 
 int main (void)
 {
+	// ASF board initialization
 	sysclk_init();
 	pmic_init();
 	irq_initialize_vectors();
 	cpu_irq_enable();
+	
+	// Openlights board initialization
+	init_pins();
+	init_globals();
+	init_strand();
+	init_rs485();
+	init_usb();
 
-	struct usart_rs232_options usart_params;
-	
-	usart_params.baudrate = 115200;
-	usart_params.charlength = USART_CHSIZE_8BIT_gc;
-	usart_params.paritytype = USART_PMODE_DISABLED_gc;
-	usart_params.stopbits = false;
-	stdio_serial_init(&USARTE0, &usart_params);
-
-	usart_params.baudrate = 2000000;
-	usart_params.charlength = USART_CHSIZE_8BIT_gc;
-	usart_params.paritytype = USART_PMODE_DISABLED_gc;
-	usart_params.stopbits = false;
-	usart_init_rs232(&USARTC0, &usart_params);
-
-	usart_set_rx_interrupt_level(&USARTC0, USART_INT_LVL_MED);
-
-	board_init();
-	
-	//printf("OpenLights Strand Controller\r\n");
-	//printf("Firmware revision %d.%d", FW_REV_MAJOR, FW_REV_MINOR);
-	
-	spi_init_pins();
-	spi_init_module();
-	
-	// Init board address
-	g_address = 0x00;
-	
-	if (!ioport_get_pin_level(SW0)) {
-		g_address |= (1<<0);
-	}
-	
-	if (!ioport_get_pin_level(SW1)) {
-		g_address |= (1<<1);
-	}
-	
-	if (!ioport_get_pin_level(SW2)) {
-		g_address |= (1<<2);
-	}
-	
-	if (!ioport_get_pin_level(SW3)) {
-		g_address |= (1<<3);
-	}
-	
-	// Init USB communications
-	g_cmdState = STATE_IDLE;
-	g_usbDataLength = 0;
-	g_usbDataCount = 0;
-	//num_bytes = 3 * num_leds;
-	
-	udc_start();
-	udc_attach();
-	usart_rx_enable(&USARTC0);
-	
-	// Init LED data buffers
-	dirty = 1;
-	memset(&data_buffer, 0, sizeof(data_buffer));
-	//memset(&back_buffer, 0, sizeof(back_buffer));
-	spi_write_packet(&SPIC, data_buffer, sizeof(data_buffer));
 	
 	// Setup timer interrupt for strand output
 	tc_enable(&TCC0);
@@ -195,11 +124,7 @@ int main (void)
 			
 			if (udi_cdc_is_tx_ready()) {
 				process_usb(false);
-			}/* else if (usart_rx_is_complete(&USARTC0)) {
-				//PORTA.OUTTGL = (1<<7);
-				g_usartData = USARTC0.DATA;
-				process_usb(true);
-			}*/
+			}
 		}		
 	}
 }

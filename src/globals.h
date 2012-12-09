@@ -41,6 +41,11 @@
 #define FW_REV_MAJOR 1
 #define FW_REV_MINOR 0
 
+/* Settings */
+ #define STRAND_BIT_RATE 2500000
+ #define RS485_BIT_RATE 2000000
+ #define USB_CDC_BIT_RATE 2000000
+
 EXTERN uint8_t g_address;
 EXTERN uint8_t g_usartData;
 EXTERN uint64_t ticks;
