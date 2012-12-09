@@ -41,7 +41,6 @@ void process_usb(uint8_t byte)
 			if (byte == USB_START_BYTE) {
 				g_cmdState = STATE_ADDRESS;					
 			}
-			udi_cdc_putc(0x01);
 			break;
 
 		case STATE_ADDRESS:
@@ -53,7 +52,6 @@ void process_usb(uint8_t byte)
 				// TODO: It might be better to read in the data length and know
 				// to ignore the next N bytes
 			}
-			udi_cdc_putc(0x01);
 			break;
 
 		case STATE_START:
@@ -65,7 +63,6 @@ void process_usb(uint8_t byte)
 				g_usbDataCount++;
 			} else {
 				g_usbDataLength += (byte << 8);
-				udi_cdc_putc(0x01);
 				if (g_usbDataLength > (USB_BUFFER_SIZE - 1)) {
 					g_usbDataLength = USB_BUFFER_SIZE - 1;
 				}
